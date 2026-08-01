@@ -14,6 +14,8 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class LoginUserService {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    JwtService jwtService;
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     public LoginUserResponseDTO loginUser(LoginUserRequestDTO loginUserRequestDTO) {
         String email = loginUserRequestDTO.getEmail();
@@ -22,17 +24,18 @@ public class LoginUserService {
         try {
             UserEntity user = userRepository.findByEmail(email);
             if(isEmpty(user)) {
-                return new LoginUserResponseDTO("User not found.", "AUTH_USER_NOT_FOUND", "FAILURE");
+                return new LoginUserResponseDTO("User not found.", "AUTH_USER_NOT_FOUND", "FAILURE", null);
             }
             else {
                 if(bCryptPasswordEncoder.matches(password, user.getPassword())) {
-                    return new LoginUserResponseDTO("Login successful.", "AUTH_SUCCESS", "SUCCESS");
+                    String token = jwtService.generateToken(user.getEmail());
+                    return new LoginUserResponseDTO("Login successful.", "AUTH_SUCCESS", "SUCCESS", token);
                 } else {
-                    return new LoginUserResponseDTO("Invalid credentials.", "AUTH_INVALID_CREDENTIALS", "FAILURE");
+                    return new LoginUserResponseDTO("Invalid credentials.", "AUTH_INVALID_CREDENTIALS", "FAILURE", null);
                 }
             }
         } catch (Exception e) {
-            return new LoginUserResponseDTO("An error occurred during login.", "AUTH_ERROR", "FAILURE");
+            return new LoginUserResponseDTO("An error occurred during login.", "AUTH_ERROR", "FAILURE", null);
         }
     }
 
