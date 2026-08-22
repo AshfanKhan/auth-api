@@ -50,6 +50,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    private SecretKey getRefreshSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtRefreshSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public String generateToken(String username) {
         return generateToken(username, new HashMap<>());
     }
@@ -71,7 +76,7 @@ public class JwtService {
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationInMs))
-                .signWith(getSigningKey())
+                .signWith(getRefreshSigningKey())
                 .compact();
     }
 
