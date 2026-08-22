@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping
 public class resource {
 
-    @Autowired
-    JwtService jwtService;
-
     @GetMapping("/api/auth/resource")
     public String getResource() {
         return "You have accessed a protected resource! 🎉";

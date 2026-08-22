@@ -5,12 +5,14 @@ public class LoginUserResponseDTO {
     private String errorCode;
     private String status;
     private String token;
+    private String refreshToken;
 
-    public LoginUserResponseDTO(String message, String errorCode, String status, String token) {
+    public LoginUserResponseDTO(String message, String errorCode, String status, String token, String refreshToken) {
         this.message = message;
         this.errorCode = errorCode;
         this.status = status;
         this.token = token;
+        this.refreshToken = refreshToken;
     }
 
     public String getMessage() {
@@ -36,5 +38,11 @@ public class LoginUserResponseDTO {
     }
     public void setToken(String token) {
         this.token = token;
+    }
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
