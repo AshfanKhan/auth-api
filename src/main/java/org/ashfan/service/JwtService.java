@@ -85,14 +85,26 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractRefreshUsername(String token) {
+        return extractRefreshClaim(token, Claims::getSubject);
+    }
+
     // validate token against a user
     public boolean isValid(String token) {
         return !isExpired(token);
     }
 
+    public boolean isRefreshValid(String token) {
+        return !isRefreshExpired(token);
+    }
+
     // check expiry
     private boolean isExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
+    }
+
+    private boolean isRefreshExpired(String token) {
+        return extractRefreshClaim(token, Claims::getExpiration).before(new Date());
     }
 
     // generic claim extractor
@@ -105,12 +117,21 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+    private <T> T extractRefreshClaim(String token, Function<Claims, T> claimsResolver) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getRefreshSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claimsResolver.apply(claims);
+    }
+
     public LoginUserResponseDTO generateNewToken(String refreshToken) {
         try {
-            String username = extractUsername(refreshToken);
+            String username = extractRefreshUsername(refreshToken);
             TokenEntity token = tokenRepository.findByUserName(username);
 
-            if(token != null && refreshToken.equals(token.getToken()) && isValid(refreshToken)) {
+            if(token != null && refreshToken.equals(token.getToken()) && isRefreshValid(refreshToken)) {
                 String newToken = generateToken(username);
                 return new LoginUserResponseDTO("Token refreshed successfully.", "TOKEN_REFRESH_SUCCESS", "SUCCESS", newToken, refreshToken);
             }
